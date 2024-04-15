@@ -43,7 +43,6 @@ describe("GET endpoints", () => {
         .expect(200)
         .then(({body}) => {
             for(key in body) {
-                console.log(body[key])
                 expect(typeof body[key].description).toBe('string')
                 expect(Array.isArray(body[key].queries)).toBe(true)
                 if (key !== "GET /api") {
@@ -59,13 +58,48 @@ describe("GET endpoints", () => {
     });
 });
 
+
+describe("GET articles", () => {
+    test("Request from /api/articles/1 returns an object with required values", () => {
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body}) => {
+            expect(typeof body.author).toBe("string")
+            expect(typeof body.title).toBe("string")
+            expect(typeof body.article_id).toBe("number")
+            expect(typeof body.body).toBe("string")
+            expect(typeof body.topic).toBe("string")
+            expect(typeof body.created_at).toBe("string")
+            expect(typeof body.votes).toBe("number")
+            expect(typeof body.article_img_url).toBe("string")
+        })
+    })
+    test("Request from /api/articles/999999 when 999999 doesn't exist, respond with 404 Nothing found", () => {
+        return request(app)
+        .get('/api/articles/999999')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe('Nothing found')
+        })
+    })
+    test("Request from /api/articles/invalid responds with 400 Bad request", () => {
+        return request(app)
+        .get('/api/articles/invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe('Bad request')
+        })
+    })
+})
+
 describe("Invalid URLs", () => {
   test("Request from /api/topics! returns 404 not found", () => {
     return request(app)
     .get('/api/topics!')
     .expect(404)
     .then(({body}) => {
-        expect(body.message).toEqual('URL not found')
+        expect(body.message).toBe('URL not found')
     })
   });
 })
