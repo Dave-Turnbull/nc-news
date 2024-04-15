@@ -60,17 +60,17 @@ describe("GET endpoints", () => {
 
 
 describe("GET articles", () => {
-    const matchArticleObject = {
-        article_id: expect.any(Number),
-        title: expect.any(String),
-        topic: expect.any(String),
-        author: expect.any(String),
-        body: expect.any(String),
-        created_at: expect.any(String),
-        votes: expect.any(Number),
-        article_img_url: expect.any(String)
-      }
     test("Request from /api/articles/1 returns an object with required values", () => {
+        const matchArticleObject = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String)
+          }
         return request(app)
         .get('/api/articles/1')
         .expect(200)
@@ -95,13 +95,24 @@ describe("GET articles", () => {
         })
     })
     test("Request from /api/articles returns an array of all articles in descending date order", () => {
+        const matchArticleObject = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number)
+          }
         return request(app)
         .get('/api/articles')
         .expect(200)
         .then(({body}) => {
             expect(body.length).toBe(13)
             body.forEach(article => {
-                expect(article).toMatchObject(matchArticleObject)  
+                expect(article).toMatchObject(matchArticleObject)
+                expect(Object.keys(article).includes('body')).toBeFalsy()
             });
             expect(body).toBeSorted({key: 'created_at', descending: true})
         })
