@@ -60,22 +60,25 @@ describe("GET endpoints", () => {
 
 
 describe("GET articles", () => {
+    const matchArticleObject = {
+        article_id: expect.any(Number),
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        body: expect.any(String),
+        created_at: expect.any(String),
+        votes: expect.any(Number),
+        article_img_url: expect.any(String)
+      }
     test("Request from /api/articles/1 returns an object with required values", () => {
         return request(app)
         .get('/api/articles/1')
         .expect(200)
         .then(({body}) => {
-            expect(typeof body.author).toBe("string")
-            expect(typeof body.title).toBe("string")
-            expect(typeof body.article_id).toBe("number")
-            expect(typeof body.body).toBe("string")
-            expect(typeof body.topic).toBe("string")
-            expect(typeof body.created_at).toBe("string")
-            expect(typeof body.votes).toBe("number")
-            expect(typeof body.article_img_url).toBe("string")
+            expect(body).toMatchObject(matchArticleObject)
         })
     })
-    test("Request from /api/articles/999999 when 999999 doesn't exist, respond with 404 Nothing found", () => {
+    test("Request from /api/articles/:id with a valid but missing id responds with 404 Nothing found", () => {
         return request(app)
         .get('/api/articles/999999')
         .expect(404)
@@ -89,6 +92,18 @@ describe("GET articles", () => {
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe('Bad request')
+        })
+    })
+    test("Request from /api/articles returns an array of all articles in descending date order", () => {
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.length).toBe(13)
+            body.forEach(article => {
+                expect(article).toMatchObject(matchArticleObject)  
+            });
+            expect(body).toBeSorted({key: 'created_at', descending: true})
         })
     })
 })

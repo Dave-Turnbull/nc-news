@@ -1,4 +1,4 @@
-const {retrieveEndpoints, retrieveData} = require('./models')
+const {retrieveEndpoints, retrieveTopics, retrieveArticles} = require('./models')
 
 exports.getEndpoints = (req, res, next) => {
     return retrieveEndpoints()
@@ -9,7 +9,7 @@ exports.getEndpoints = (req, res, next) => {
 }
 
 exports.getTopics = (req, res, next) => {
-    return retrieveData('topics')
+    return retrieveTopics('topics')
     .then(({rows}) => {
         res.status(200).send(rows)
     })
@@ -21,12 +21,21 @@ exports.getArticlesById = (req, res, next) => {
     if (isNaN(params.id)) {
         return next({status: 400, message: 'Bad request'})
     }
-    return retrieveData('articles', params.id)
+    return retrieveArticles(params.id)
     .then(({rows}) => {
         res.status(200).send(rows[0])
     })
     .catch(next) 
 }
+
+exports.getArticles = (req, res, next) => {
+    return retrieveArticles()
+    .then(({rows}) => {
+        res.status(200).send(rows)
+    })
+    .catch(next) 
+}
+
 
 exports.urlNotFound = (req, res, next) => {
     return next({status: 404, message: 'URL not found'})

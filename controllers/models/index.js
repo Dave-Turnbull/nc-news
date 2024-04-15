@@ -11,11 +11,7 @@ exports.retrieveEndpoints = () => {
     })
 }
 
-exports.retrieveData = (tableName, id) => {
-    let sqlQuery = `SELECT * FROM ${tableName}`
-    if (id) {
-        sqlQuery += ` WHERE ${tableName.slice(0, -1)}_id=${id}`
-    }
+const retrieveData = (sqlQuery) => {
     return db.query(sqlQuery)
     .then((result) => {
         if(result.rows.length === 0) {
@@ -23,4 +19,18 @@ exports.retrieveData = (tableName, id) => {
         }
         return result
     })
+}
+
+exports.retrieveTopics = () => {
+    let sqlQuery = `SELECT * FROM topics`
+    return retrieveData(sqlQuery)
+}
+
+exports.retrieveArticles = (id) => {
+    let sqlQuery = `SELECT * FROM articles`
+    if (id) {
+        sqlQuery += ` WHERE article_id=${id}`
+    }
+    sqlQuery += ` ORDER BY created_at DESC`
+    return retrieveData(sqlQuery)
 }
