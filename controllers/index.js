@@ -1,4 +1,12 @@
-const {retrieveTopics} = require('./models')
+const {retrieveEndpoints, retrieveTopics} = require('./models')
+
+exports.getEndpoints = (req, res, next) => {
+    return retrieveEndpoints()
+    .then((body) => {
+        res.status(200).send(body)
+    })
+    .catch(next) 
+}
 
 exports.getTopics = (req, res, next) => {
     return retrieveTopics()

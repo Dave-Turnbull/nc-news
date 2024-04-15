@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
-const {getTopics, urlNotFound} = require('./controllers')
+const {getEndpoints, getTopics, urlNotFound} = require('./controllers')
+
+app.get('/api', getEndpoints)
 
 app.get('/api/topics', getTopics)
 
