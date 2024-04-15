@@ -46,8 +46,13 @@ exports.retrieveArticles = (id) => {
         GROUP BY comments.article_id
     ) comments ON comments.article_id = articles.article_id`
     sqlQuery += ` ORDER BY created_at DESC`
+    return retrieveData(sqlQuery)
+}
+
+exports.retrieveComments = (id) => {
+    let sqlQuery = `SELECT * FROM comments WHERE article_id=${id}`
     return retrieveData(sqlQuery).then((result) => {
-        console.log(result)
+        console.log(result.rows)
         return result
     })
 }

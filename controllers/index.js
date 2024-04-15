@@ -1,4 +1,10 @@
-const {retrieveEndpoints, retrieveTopics, retrieveArticlesById, retrieveArticles} = require('./models')
+const {
+    retrieveEndpoints, 
+    retrieveTopics, 
+    retrieveArticlesById, 
+    retrieveArticles, 
+    retrieveComments
+} = require('./models')
 
 exports.getEndpoints = (req, res, next) => {
     return retrieveEndpoints()
@@ -34,6 +40,19 @@ exports.getArticles = (req, res, next) => {
         res.status(200).send(rows)
     })
     .catch(next) 
+}
+
+exports.getCommentsByArticleId = (req, res, next) => {
+    const {params} = req
+    if (isNaN(params.id)) {
+        return next({status: 400, message: 'Bad request'})
+    }
+    return retrieveComments(params.id)
+    .then(({rows}) => {
+        res.status(200).send(rows)
+    })
+    .catch(next) 
+    
 }
 
 exports.urlNotFound = (req, res, next) => {

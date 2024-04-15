@@ -119,6 +119,28 @@ describe("GET articles", () => {
     })
 })
 
+describe("GET comments", () => {
+    test("Request from /api/articles/1/comments returns an array of comments for the specified article", () => {
+        const matchCommentObject = {
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: 1
+          }
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.length).toBe(11)
+            body.forEach(article => {
+                expect(article).toMatchObject(matchCommentObject)
+            });
+        })
+    })
+})
+
 describe("Invalid URLs", () => {
   test("Request from /api/topics! returns 404 not found", () => {
     return request(app)
