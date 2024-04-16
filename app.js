@@ -5,6 +5,7 @@ const {
     getTopics, 
     getArticlesById, 
     getArticles, 
+    checkValidArticle,
     getCommentsByArticleId, 
     postCommentByArticleId,
     patchArticleVotes,
@@ -16,6 +17,9 @@ app.get('/api', getEndpoints)
 app.get('/api/topics', getTopics)
 
 app.get('/api/articles/:id', getArticlesById)
+
+//not sure if this is a better way to do error handling than promise.all but seems cleaner
+app.all('/api/articles/:id*', checkValidArticle)
 
 app.get('/api/articles', getArticles)
 
@@ -37,7 +41,7 @@ app.use((err, req, res, next) => {
     }
     if (codes.missingInputData.includes(err.code)) {
         const missingDataName = err.detail.match(/[a-z]+/ig)[1]
-        res.status(404).send({message: `${missingDataName} doesn't exist`})
+        res.status(404).send({message: `${missingDataName} not found`})
     }
     if (codes.badRequest.includes(err.code)) {
         res.status(400).send({message: 'Bad request'})

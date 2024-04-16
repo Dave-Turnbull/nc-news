@@ -41,18 +41,25 @@ exports.getArticles = (req, res, next) => {
     .catch(next) 
 }
 
+exports.checkValidArticle = (req, res, next) => {
+    const {params} = req
+    retrieveArticlesById(params.id)
+    .catch(next) 
+    return next()
+}
+
 exports.getCommentsByArticleId = (req, res, next) => {
     const {params} = req
-    return Promise.all([retrieveComments(params.id), retrieveArticlesById(params.id)])
-    .then(([{rows}]) => {
+    return retrieveComments(params.id)
+    .then(({rows}) => {
         res.status(200).send(rows)
     })
     .catch(next) 
 }
 exports.postCommentByArticleId = (req, res, next) => {
     const {params, body} = req
-    return Promise.all([postComment(params.id, body), retrieveArticlesById(params.id)])
-    .then(([result]) => {
+    return postComment(params.id, body)
+    .then((result) => {
         res.status(201).send(result)
     })
     .catch(next)
