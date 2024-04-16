@@ -6,8 +6,9 @@ const {
     getArticlesById, 
     getArticles, 
     getCommentsByArticleId, 
-    urlNotFound,
-    postCommentByArticleId
+    postCommentByArticleId,
+    patchArticleVotes,
+    urlNotFound
     } = require('./controllers')
 
 app.get('/api', getEndpoints)
@@ -23,6 +24,8 @@ app.get('/api/articles/:id/comments', getCommentsByArticleId)
 app.use(express.json())
 
 app.post('/api/articles/:id/comments', postCommentByArticleId)
+
+app.patch('/api/articles/:id', patchArticleVotes)
 
 app.get('*', urlNotFound)
 app.post('*', urlNotFound)

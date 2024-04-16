@@ -68,3 +68,11 @@ exports.postComment = (id, body) => {
         return Promise.reject(err)
     }) 
 }
+
+exports.incrementVotes = (id, incvotes, tableItem) => {
+    return db.query(`
+        UPDATE ${tableItem}s 
+        SET votes = votes + ${incvotes} 
+        WHERE ${tableItem}_id = ${id}
+        RETURNING *`)
+}

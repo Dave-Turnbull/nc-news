@@ -4,7 +4,8 @@ const {
     retrieveArticlesById, 
     retrieveArticles, 
     retrieveComments,
-    postComment
+    postComment,
+    incrementVotes
 } = require('./models')
 
 exports.getEndpoints = (req, res, next) => {
@@ -60,6 +61,17 @@ exports.postCommentByArticleId = (req, res, next) => {
     .catch(next)
 }
 
+exports.patchArticleVotes = (req, res, next) => {
+    const {params, body} = req
+    console.log(body)
+    return incrementVotes(params.id, body.inc_votes, 'article')
+    .then(({rows}) => {
+        res.status(200).send(rows)
+    })
+    .catch(next)
+}
+
 exports.urlNotFound = (req, res, next) => {
     return next({status: 404, message: 'URL not found'})
+    .catch(next)
 }

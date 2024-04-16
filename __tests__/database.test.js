@@ -247,6 +247,32 @@ describe("POST comments", () => {
     })
 })
 
+describe("PATCH articles", () => {
+    test("Update article votes when patching with valid body", () => {
+        const patchRequest = {
+            inc_votes: 3
+        }
+        const matchArticleObject = {
+            article_id: 2,
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: 3,
+            article_img_url: expect.any(String)
+          }
+        return request(app)
+        .patch('/api/articles/2')
+        .send(patchRequest)
+        .expect(200)
+        .then(({body}) => {
+            console.log(body)
+            expect(body[0]).toMatchObject(matchArticleObject)
+        })
+    })
+})
+
 describe("Invalid URLs", () => {
   test("Request from /api/topics! returns 404 not found", () => {
     return request(app)
