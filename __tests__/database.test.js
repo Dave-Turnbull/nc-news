@@ -199,16 +199,16 @@ describe("POST comments", () => {
         .send(missingUserComment)
         .expect(404)
         .then(({body}) => {
-            expect(body.message).toBe("author doesn't exist")
+            expect(body.message).toBe("author not found")
         })
     })
-    test("POST to valid but missing article ID returns 404 article doesn't exist", () => {
+    test("POST to valid but missing article ID returns 404 article not found", () => {
         return request(app)
         .post('/api/articles/99999/comments')
         .send(validComment)
         .expect(404)
         .then(({body}) => {
-            expect(body.message).toBe("article doesn't exist")
+            expect(body.message).toBe("article not found")
         })
     })
     test("POST with valid username and article_id but missing body returns 400 Bad request", () => {
@@ -235,26 +235,76 @@ describe("POST comments", () => {
 })
 
 describe("PATCH articles", () => {
+    const matchArticleObject = {
+        title: expect.any(String),
+        topic: expect.any(String),
+        author: expect.any(String),
+        body: expect.any(String),
+        created_at: expect.any(String),
+        article_img_url: expect.any(String)
+      }
     test("Update article votes when patching with valid body", () => {
         const patchRequest = {
             inc_votes: 3
         }
-        const matchArticleObject = {
-            article_id: 2,
-            title: expect.any(String),
-            topic: expect.any(String),
-            author: expect.any(String),
-            body: expect.any(String),
-            created_at: expect.any(String),
-            votes: 3,
-            article_img_url: expect.any(String)
-          }
+        matchArticleObject.article_id = 2
+        matchArticleObject.votes = 3
         return request(app)
         .patch('/api/articles/2')
         .send(patchRequest)
         .expect(200)
         .then(({body}) => {
             expect(body).toMatchObject(matchArticleObject)
+        })
+    })
+    test("Can remove votes", () => {
+        const patchRequest = {
+            inc_votes: -101
+        }
+        matchArticleObject.article_id = 1
+        matchArticleObject.votes = -1
+        return request(app)
+        .patch('/api/articles/1')
+        .send(patchRequest)
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchArticleObject)
+        })
+    })
+    test("PATCH to invalid article ID returns 400 Bad request", () => {
+        const patchRequest = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/articles/invalid')
+        .send(patchRequest)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test("PATCH to valid but missing article ID returns 404 article not found", () => {
+        const patchRequest = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/articles/99999')
+        .send(patchRequest)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe("article not found")
+        })
+    })
+    test("PATCH using invalid body returns 400 Bad request", () => {
+        const patchRequest = {
+            inc_votes: 'all the votes'
+        }
+        return request(app)
+        .patch('/api/articles/1')
+        .send(patchRequest)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
         })
     })
 })

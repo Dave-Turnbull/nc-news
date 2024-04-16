@@ -61,12 +61,13 @@ exports.postComment = (id, body) => {
     })
 }
 
+//using tableItem so this can be reused for comments
 exports.incrementVotes = (id, incvotes, tableItem) => {
     return db.query(`
         UPDATE ${tableItem}s 
-        SET votes = votes + ${incvotes} 
-        WHERE ${tableItem}_id = ${id}
-        RETURNING *`)
+        SET votes = votes + $1 
+        WHERE ${tableItem}_id = $2
+        RETURNING *`, [incvotes, id])
     .then(({rows}) => {
         return rows[0]
     })
