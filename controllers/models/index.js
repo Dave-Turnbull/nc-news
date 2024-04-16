@@ -15,7 +15,8 @@ const retrieveData = (sqlQuery) => {
     return db.query(sqlQuery)
     .then((result) => {
         if(result.rows.length === 0) {
-            return Promise.reject({status: 404, message: 'Nothing found'})
+            const dataName = result.fields[0].name.match(/^[a-z]+/i)[0]
+            return Promise.reject({status: 404, message: `${dataName} not found`})
         }
         return result
     })
@@ -50,9 +51,5 @@ exports.retrieveArticles = (id) => {
 }
 
 exports.retrieveComments = (id) => {
-    let sqlQuery = `SELECT * FROM comments WHERE article_id=${id}`
-    return retrieveData(sqlQuery).then((result) => {
-        console.log(result.rows)
-        return result
-    })
+    return db.query(`SELECT * FROM comments WHERE article_id=${id}`)
 }

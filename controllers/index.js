@@ -24,9 +24,6 @@ exports.getTopics = (req, res, next) => {
 
 exports.getArticlesById = (req, res, next) => {
     const {params} = req
-    if (isNaN(params.id)) {
-        return next({status: 400, message: 'Bad request'})
-    }
     return retrieveArticlesById(params.id)
     .then(({rows}) => {
         res.status(200).send(rows[0])
@@ -44,15 +41,11 @@ exports.getArticles = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
     const {params} = req
-    if (isNaN(params.id)) {
-        return next({status: 400, message: 'Bad request'})
-    }
-    return retrieveComments(params.id)
-    .then(({rows}) => {
+    return Promise.all([retrieveComments(params.id), retrieveArticlesById(params.id)])
+    .then(([{rows}]) => {
         res.status(200).send(rows)
     })
     .catch(next) 
-    
 }
 
 exports.urlNotFound = (req, res, next) => {
