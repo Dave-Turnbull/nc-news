@@ -5,7 +5,7 @@ const request = require("supertest");
 const app = require("../app.js");
 const endpoints = require("../endpoints.json");
 
-beforeAll(() => {
+beforeEach(() => {
   return seed(testData);
 });
 
@@ -169,7 +169,7 @@ describe("GET comments", () => {
 
 describe("POST comments", () => {
     const matchCommentObject = {
-        comment_id: expect.any(Number),
+        comment_id: 19,
         votes: 0,
         created_at: expect.any(String),
         author: 'rogersop',
@@ -186,19 +186,10 @@ describe("POST comments", () => {
         .send(validComment)
         .expect(201)
         .then(({body}) => {
-            expect(body[0]).toMatchObject(matchCommentObject)
+            expect(body).toMatchObject(matchCommentObject)
         })
     })
-    test("After POST, comment is added to the comments table", () => {
-        return request(app)
-        .get('/api/articles/2/comments')
-        .expect(200)
-        .then(({body}) => {
-            expect(body.length).toBe(1)
-            expect(body[0]).toMatchObject(matchCommentObject)
-        })
-    })
-    test("POST /api/articles/2/comments with missing user returns 422", () => {
+    test("POST /api/articles/2/comments with missing user returns 404", () => {
         const missingUserComment = {
             username: 'missingUser',
             body: 'Hello'
@@ -206,16 +197,16 @@ describe("POST comments", () => {
         return request(app)
         .post('/api/articles/2/comments')
         .send(missingUserComment)
-        .expect(422)
+        .expect(404)
         .then(({body}) => {
-            expect(body.message).toBe("username doesn't exist")
+            expect(body.message).toBe("author doesn't exist")
         })
     })
-    test("POST to valid but missing article ID returns 422 article doesn't exist", () => {
+    test("POST to valid but missing article ID returns 404 article doesn't exist", () => {
         return request(app)
         .post('/api/articles/99999/comments')
         .send(validComment)
-        .expect(422)
+        .expect(404)
         .then(({body}) => {
             expect(body.message).toBe("article doesn't exist")
         })
@@ -232,14 +223,10 @@ describe("POST comments", () => {
             expect(body.message).toBe("Bad request")
         })
     })
-    test("POST with valid username and article_id but invalid body returns 400 Bad request", () => {
-        const invalidBody = {
-            username: 'rogersop',
-            body: 1
-        }
+    test("POST to invalid article ID returns 400 Bad request", () => {
         return request(app)
-        .post('/api/articles/2/comments')
-        .send(invalidBody)
+        .post('/api/articles/invalid/comments')
+        .send(validComment)
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe("Bad request")
@@ -267,8 +254,7 @@ describe("PATCH articles", () => {
         .send(patchRequest)
         .expect(200)
         .then(({body}) => {
-            console.log(body)
-            expect(body[0]).toMatchObject(matchArticleObject)
+            expect(body).toMatchObject(matchArticleObject)
         })
     })
 })

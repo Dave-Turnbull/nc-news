@@ -51,22 +51,18 @@ exports.getCommentsByArticleId = (req, res, next) => {
 }
 exports.postCommentByArticleId = (req, res, next) => {
     const {params, body} = req
-    if (typeof body.username !== 'string' || typeof body.body !== 'string') {
-        next({status: 400, message: 'Bad request'})
-    }
-    return postComment(params.id, body)
-    .then(({rows}) => {
-        res.status(201).send(rows)
+    return Promise.all([postComment(params.id, body), retrieveArticlesById(params.id)])
+    .then(([result]) => {
+        res.status(201).send(result)
     })
     .catch(next)
 }
 
 exports.patchArticleVotes = (req, res, next) => {
     const {params, body} = req
-    console.log(body)
     return incrementVotes(params.id, body.inc_votes, 'article')
-    .then(({rows}) => {
-        res.status(200).send(rows)
+    .then((result) => {
+        res.status(200).send(result)
     })
     .catch(next)
 }
