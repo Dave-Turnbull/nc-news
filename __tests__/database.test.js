@@ -220,6 +220,31 @@ describe("POST comments", () => {
             expect(body.message).toBe("article doesn't exist")
         })
     })
+    test("POST with valid username and article_id but missing body returns 400 Bad request", () => {
+        const missingBody = {
+            username: 'rogersop',
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(missingBody)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test("POST with valid username and article_id but invalid body returns 400 Bad request", () => {
+        const invalidBody = {
+            username: 'rogersop',
+            body: 1
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(invalidBody)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
 })
 
 describe("Invalid URLs", () => {

@@ -59,7 +59,6 @@ exports.postComment = (id, body) => {
     RETURNING *
     `, [body.body, body.username])
     .catch((err) => {
-        console.log(err)
         if (err.code === '23503' && err.constraint === 'comments_author_fkey') {
             return Promise.reject({status: 422, message: "username doesn't exist"})
         }

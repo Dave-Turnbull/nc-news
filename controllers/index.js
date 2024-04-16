@@ -50,7 +50,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
 }
 exports.postCommentByArticleId = (req, res, next) => {
     const {params, body} = req
-    if (typeof body.username !== 'string' && typeof body.body !== 'string') {
+    if (typeof body.username !== 'string' || typeof body.body !== 'string') {
         next({status: 400, message: 'Bad request'})
     }
     return postComment(params.id, body)
