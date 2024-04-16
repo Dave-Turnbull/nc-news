@@ -52,5 +52,21 @@
       "body": "comment content here",
       "article_id": 1
     }
+  },
+  "POST /api/articles/:id/comments": {
+    "description": "serves all comments for article matching the id passed in :id",
+    "queries": [],
+    "bodyFormat": {
+      "username": "a_valid_username",
+      "body": "the comment content..."
+    },
+    "exampleResponse": {
+      "comment_id": 13,
+      "votes": 9,
+      "created_at": "2018-05-30T15:59:13.341Z",
+      "author": "david",
+      "body": "comment content here",
+      "article_id": 1
+    }
   }
 }

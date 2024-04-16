@@ -3,7 +3,8 @@ const {
     retrieveTopics, 
     retrieveArticlesById, 
     retrieveArticles, 
-    retrieveComments
+    retrieveComments,
+    postComment
 } = require('./models')
 
 exports.getEndpoints = (req, res, next) => {
@@ -46,6 +47,17 @@ exports.getCommentsByArticleId = (req, res, next) => {
         res.status(200).send(rows)
     })
     .catch(next) 
+}
+exports.postCommentByArticleId = (req, res, next) => {
+    const {params, body} = req
+    if (typeof body.username !== 'string' && typeof body.body !== 'string') {
+        next({status: 400, message: 'Bad request'})
+    }
+    return postComment(params.id, body)
+    .then(({rows}) => {
+        res.status(201).send(rows)
+    })
+    .catch(next)
 }
 
 exports.urlNotFound = (req, res, next) => {
