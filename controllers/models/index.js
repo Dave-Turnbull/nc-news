@@ -51,5 +51,5 @@ exports.retrieveArticles = (id) => {
 }
 
 exports.retrieveComments = (id) => {
-    return db.query(`SELECT * FROM comments WHERE article_id=${id}`)
+    return db.query(`SELECT * FROM comments WHERE article_id=${id} ORDER BY created_at DESC`)
 }
