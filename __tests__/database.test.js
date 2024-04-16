@@ -78,12 +78,12 @@ describe("GET articles", () => {
             expect(body).toMatchObject(matchArticleObject)
         })
     })
-    test("Request from /api/articles/:id with a valid but missing id responds with 404 Nothing found", () => {
+    test("Request from /api/articles/:id with a valid but missing id responds with 404 article not found", () => {
         return request(app)
         .get('/api/articles/999999')
         .expect(404)
         .then(({body}) => {
-            expect(body.message).toBe('Nothing found')
+            expect(body.message).toBe('article not found')
         })
     })
     test("Request from /api/articles/invalid responds with 400 Bad request", () => {
@@ -115,6 +115,52 @@ describe("GET articles", () => {
                 expect(Object.keys(article).includes('body')).toBeFalsy()
             });
             expect(body).toBeSorted({key: 'created_at', descending: true})
+        })
+    })
+})
+
+describe("GET comments", () => {
+    test("Request from /api/articles/1/comments returns an array of comments for the specified article", () => {
+        const matchCommentObject = {
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: 1
+          }
+        return request(app)
+        .get('/api/articles/1/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.length).toBe(11)
+            body.forEach(article => {
+                expect(article).toMatchObject(matchCommentObject)
+            });
+        })
+    })
+    test("Request for valid but missing article ID returns 404 article not found", () => {
+        return request(app)
+        .get('/api/articles/99999/comments')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe('article not found')
+        })
+    })
+    test("Request for existing article with no comments returns 200 and empty array", () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toEqual([])
+        })
+    })
+    test("Request for invalid article ID returns 400 Bad request", () => {
+        return request(app)
+        .get('/api/articles/invalid/comments')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe('Bad request')
         })
     })
 })
