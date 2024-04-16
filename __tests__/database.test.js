@@ -309,6 +309,17 @@ describe("PATCH articles", () => {
     })
 })
 
+describe.only("DELETE comments", () => {
+    test("DELETE /api/comments/:comment_id deletes the comment and returns 204 no content", () => {
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+        .then(({body}) => {
+            expect(body).toEqual({})//this needs changing
+        })
+    })
+})
+
 describe("Invalid URLs", () => {
   test("Request from /api/topics! returns 404 not found", () => {
     return request(app)

@@ -61,14 +61,21 @@ exports.postComment = (id, body) => {
     })
 }
 
-//using tableItem so this can be reused for comments
-exports.incrementVotes = (id, incvotes, tableItem) => {
+exports.incrementArticleVote = (id, incvotes) => {
     return db.query(`
-        UPDATE ${tableItem}s 
+        UPDATE articles 
         SET votes = votes + $1 
-        WHERE ${tableItem}_id = $2
+        WHERE article_id = $2
         RETURNING *`, [incvotes, id])
     .then(({rows}) => {
         return rows[0]
     })
+}
+
+exports.deleteComment = (id) => {
+    return db.query(`
+        DELETE FROM comments 
+        WHERE comment_id = $1
+        RETURNING *
+        `, [id])
 }
