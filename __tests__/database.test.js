@@ -5,7 +5,7 @@ const request = require("supertest");
 const app = require("../app.js");
 const endpoints = require("../endpoints.json");
 
-beforeEach(() => {
+beforeAll(() => {
   return seed(testData);
 });
 
@@ -162,6 +162,62 @@ describe("GET comments", () => {
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe('Bad request')
+        })
+    })
+})
+
+
+describe("POST comments", () => {
+    const matchCommentObject = {
+        comment_id: expect.any(Number),
+        votes: 0,
+        created_at: expect.any(String),
+        author: 'rogersop',
+        body: 'Amazing article',
+        article_id: 2
+      }
+      const validComment = {
+        username: 'rogersop',
+        body: 'Amazing article'
+    }
+    test("POST /api/articles/2/comments with existing user and valid body returns a comment", () => {
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(validComment)
+        .expect(201)
+        .then(({body}) => {
+            expect(body[0]).toMatchObject(matchCommentObject)
+        })
+    })
+    test("After POST, comment is added to the comments table", () => {
+        return request(app)
+        .get('/api/articles/2/comments')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.length).toBe(1)
+            expect(body[0]).toMatchObject(matchCommentObject)
+        })
+    })
+    test("POST /api/articles/2/comments with missing user returns 422", () => {
+        const missingUserComment = {
+            username: 'missingUser',
+            body: 'Hello'
+        }
+        return request(app)
+        .post('/api/articles/2/comments')
+        .send(missingUserComment)
+        .expect(422)
+        .then(({body}) => {
+            expect(body.message).toBe("username doesn't exist")
+        })
+    })
+    test("POST to valid but missing article ID returns 422 article doesn't exist", () => {
+        return request(app)
+        .post('/api/articles/99999/comments')
+        .send(validComment)
+        .expect(422)
+        .then(({body}) => {
+            expect(body.message).toBe("article doesn't exist")
         })
     })
 })
