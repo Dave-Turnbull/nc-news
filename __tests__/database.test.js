@@ -43,7 +43,6 @@ describe("GET endpoints", () => {
         .expect(200)
         .then(({body}) => {
             for(key in body) {
-                console.log(body[key])
                 expect(typeof body[key].description).toBe('string')
                 expect(Array.isArray(body[key].queries)).toBe(true)
                 if (key !== "GET /api") {
@@ -59,13 +58,74 @@ describe("GET endpoints", () => {
     });
 });
 
+
+describe("GET articles", () => {
+    test("Request from /api/articles/1 returns an object with required values", () => {
+        const matchArticleObject = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String)
+          }
+        return request(app)
+        .get('/api/articles/1')
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchArticleObject)
+        })
+    })
+    test("Request from /api/articles/:id with a valid but missing id responds with 404 Nothing found", () => {
+        return request(app)
+        .get('/api/articles/999999')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe('Nothing found')
+        })
+    })
+    test("Request from /api/articles/invalid responds with 400 Bad request", () => {
+        return request(app)
+        .get('/api/articles/invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe('Bad request')
+        })
+    })
+    test("Request from /api/articles returns an array of all articles in descending date order", () => {
+        const matchArticleObject = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: expect.any(String),
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number)
+          }
+        return request(app)
+        .get('/api/articles')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.length).toBe(13)
+            body.forEach(article => {
+                expect(article).toMatchObject(matchArticleObject)
+                expect(Object.keys(article).includes('body')).toBeFalsy()
+            });
+            expect(body).toBeSorted({key: 'created_at', descending: true})
+        })
+    })
+})
+
 describe("Invalid URLs", () => {
   test("Request from /api/topics! returns 404 not found", () => {
     return request(app)
     .get('/api/topics!')
     .expect(404)
     .then(({body}) => {
-        expect(body.message).toEqual('URL not found')
+        expect(body.message).toBe('URL not found')
     })
   });
 })
