@@ -136,7 +136,8 @@ describe("GET comments", () => {
             expect(body.length).toBe(11)
             body.forEach(article => {
                 expect(article).toMatchObject(matchCommentObject)
-            });
+            })
+            expect(body).toBeSorted({key: 'created_at', descending: true})
         })
     })
     test("Request for valid but missing article ID returns 404 article not found", () => {
