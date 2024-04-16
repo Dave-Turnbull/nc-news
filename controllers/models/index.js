@@ -6,8 +6,6 @@ exports.retrieveEndpoints = () => {
     .then((result) => {
         const endpoints = JSON.parse(result)
         return endpoints
-    }).catch((err) => {
-        Promise.reject(err)
     })
 }
 
@@ -55,17 +53,21 @@ exports.retrieveComments = (id) => {
 exports.postComment = (id, body) => {
     return db.query(`
     INSERT INTO comments (body, author, article_id, votes, created_at)
-    VALUES ($1, $2, ${id}, 0, '${new Date().toISOString()}')
+    VALUES ($1, $2, $3, 0, $4)
     RETURNING *
-    `, [body.body, body.username])
-    .catch((err) => {
-        console.log(err)
-        if (err.code === '23503' && err.constraint === 'comments_author_fkey') {
-            return Promise.reject({status: 422, message: "username doesn't exist"})
-        }
-        if (err.code === '23503' && err.constraint === 'comments_article_id_fkey') {
-            return Promise.reject({status: 422, message: "article doesn't exist"})
-        }
-        return Promise.reject(err)
-    }) 
+    `, [body.body, body.username, id, new Date().toISOString()])
+    .then(({rows}) => {
+        return rows[0]
+    })
+}
+
+exports.incrementVotes = (id, incvotes, tableItem) => {
+    return db.query(`
+        UPDATE ${tableItem}s 
+        SET votes = votes + ${incvotes} 
+        WHERE ${tableItem}_id = ${id}
+        RETURNING *`)
+    .then(({rows}) => {
+        return rows[0]
+    })
 }

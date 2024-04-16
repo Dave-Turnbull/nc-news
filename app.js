@@ -6,8 +6,9 @@ const {
     getArticlesById, 
     getArticles, 
     getCommentsByArticleId, 
-    urlNotFound,
-    postCommentByArticleId
+    postCommentByArticleId,
+    patchArticleVotes,
+    urlNotFound
     } = require('./controllers')
 
 app.get('/api', getEndpoints)
@@ -24,11 +25,21 @@ app.use(express.json())
 
 app.post('/api/articles/:id/comments', postCommentByArticleId)
 
+app.patch('/api/articles/:id', patchArticleVotes)
+
 app.get('*', urlNotFound)
 app.post('*', urlNotFound)
 
 app.use((err, req, res, next) => {
-    if (err.code === '42703') {
+    const codes = {
+        badRequest: ['22P02', '42703', '23502'],
+        missingInputData: ['23503']
+    }
+    if (codes.missingInputData.includes(err.code)) {
+        const missingDataName = err.detail.match(/[a-z]+/ig)[1]
+        res.status(404).send({message: `${missingDataName} doesn't exist`})
+    }
+    if (codes.badRequest.includes(err.code)) {
         res.status(400).send({message: 'Bad request'})
     }
     if (err.status && err.message) { 
