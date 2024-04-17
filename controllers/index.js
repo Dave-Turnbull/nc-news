@@ -21,7 +21,7 @@ exports.getEndpoints = (req, res, next) => {
 exports.getTopics = (req, res, next) => {
     return retrieveTopics('topics')
     .then(({rows}) => {
-        res.status(200).send(rows)
+        res.status(200).send({topics: rows})
     })
     .catch(next) 
 }
@@ -36,9 +36,10 @@ exports.getArticlesById = (req, res, next) => {
 }
 
 exports.getArticles = (req, res, next) => {
-    return retrieveArticles()
+    const {query} = req
+    return retrieveArticles(query)
     .then(({rows}) => {
-        res.status(200).send(rows)
+        res.status(200).send({articles: rows})
     })
     .catch(next) 
 }
@@ -53,7 +54,7 @@ exports.checkValidArticle = (req, res, next) => {
 exports.getUsers = (req, res, next) => {
     return retrieveUsers()
     .then(({rows}) => {
-        res.status(200).send(rows)
+        res.status(200).send({users: rows})
     })
     .catch(next)
 }

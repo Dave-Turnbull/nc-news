@@ -52,14 +52,17 @@ app.use((err, req, res, next) => {
     if (codes.badRequest.includes(err.code)) {
         res.status(400).send({message: 'Bad request'})
     }
-    if (err.status && err.message) { 
-        res.status(err.status).send({message: err.message})
-    }
-    next()
+    next(err)
 })
 
 app.use((err, req, res, next) => {
-    console.log(err)
+    if (err.status && err.message) { 
+        res.status(err.status).send({message: err.message})
+    }
+    next(err)
+})
+
+app.use((err, req, res, next) => {
     res.status(500).send({ message: "Internal server error"})
 })
 

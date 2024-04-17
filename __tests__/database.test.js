@@ -19,8 +19,8 @@ describe("GET topics", () => {
     .get('/api/topics')
     .expect(200)
     .then(({body}) => {
-        expect(body.length).toBe(3)
-        body.forEach(topic => {
+        expect(body.topics.length).toBe(3)
+        body.topics.forEach(topic => {
             expect(typeof topic.description).toBe('string')
             expect(typeof topic.slug).toBe('string')
         });
@@ -109,12 +109,74 @@ describe("GET articles", () => {
         .get('/api/articles')
         .expect(200)
         .then(({body}) => {
-            expect(body.length).toBe(13)
-            body.forEach(article => {
+            expect(body.articles.length).toBe(13)
+            body.articles.forEach(article => {
                 expect(article).toMatchObject(matchArticleObject)
                 expect(Object.keys(article).includes('body')).toBeFalsy()
             });
-            expect(body).toBeSorted({key: 'created_at', descending: true})
+            expect(body.articles).toBeSorted({key: 'created_at', descending: true})
+        })
+    })
+    test("Request from /api/articles with ?topic query filters articles by topic", () => {
+        const matchArticleObject = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: 'cats',
+            author: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number)
+          }
+        return request(app)
+        .get('/api/articles?topic=cats')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles.length).toBe(1)
+            body.articles.forEach(article => {
+                expect(article).toMatchObject(matchArticleObject)
+                expect(Object.keys(article).includes('body')).toBeFalsy()
+            });
+            expect(body.articles).toBeSorted({key: 'created_at', descending: true})
+        })
+    })
+    test("Request from /api/articles with non existent ?topic query returns 404", () => {
+        return request(app)
+        .get('/api/articles?topic=invalid')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe("article not found")
+        })
+    })
+    test("Request from /api/articles with ?author and ?topic query filters articles by author and topic", () => {
+        const matchArticleObject = {
+            article_id: expect.any(Number),
+            title: expect.any(String),
+            topic: 'mitch',
+            author: 'rogersop',
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number)
+          }
+        return request(app)
+        .get('/api/articles?topic=mitch&&author=rogersop')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles.length).toBe(2)
+            body.articles.forEach(article => {
+                expect(article).toMatchObject(matchArticleObject)
+                expect(Object.keys(article).includes('body')).toBeFalsy()
+            });
+            expect(body.articles).toBeSorted({key: 'created_at', descending: true})
+        })
+    })
+    test("Request with invalid query returns 400 Invalid query", () => {
+        return request(app)
+        .get('/api/articles?invalid=mitch&&author=rogersop')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Invalid query")
         })
     })
 })
@@ -335,7 +397,7 @@ describe("DELETE comments", () => {
 
 describe("GET users", () => {
     test("Request from /api/users returns an array of all users", () => {
-        const matchArticleObject = {
+        const matchUserObject = {
             username: expect.any(String),
             name: expect.any(String),
             avatar_url: expect.any(String),
@@ -344,9 +406,9 @@ describe("GET users", () => {
         .get('/api/users')
         .expect(200)
         .then(({body}) => {
-            expect(body.length).toBe(4)
-            body.forEach(article => {
-                expect(article).toMatchObject(matchArticleObject)
+            expect(body.users.length).toBe(4)
+            body.users.forEach(user => {
+                expect(user).toMatchObject(matchUserObject)
             });
         })
     })
