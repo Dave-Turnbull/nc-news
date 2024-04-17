@@ -46,7 +46,7 @@ exports.checkValidArticle = (req, res, next) => {
     const {params} = req
     retrieveArticlesById(params.id)
     .catch(next) 
-    return next()
+    next()
 }
 
 exports.getCommentsByArticleId = (req, res, next) => {

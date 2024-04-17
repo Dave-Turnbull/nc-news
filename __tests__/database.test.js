@@ -309,13 +309,26 @@ describe("PATCH articles", () => {
     })
 })
 
-describe.only("DELETE comments", () => {
-    test("DELETE /api/comments/:comment_id deletes the comment and returns 204 no content", () => {
+describe("DELETE comments", () => {
+    test("DELETE /api/comments/1 deletes the comment and returns 204 with no content", () => {
         return request(app)
         .delete('/api/comments/1')
         .expect(204)
+    })
+    test("DELETE to valid but missing comment id returns 404 comment not found", () => {
+        return request(app)
+        .delete('/api/comments/9999')
+        .expect(404)
         .then(({body}) => {
-            expect(body).toEqual({})//this needs changing
+            expect(body.message).toBe("comment not found")
+        })
+    })
+    test("DELETE to invalid comment id returns 400 bad request", () => {
+        return request(app)
+        .delete('/api/comments/invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
         })
     })
 })
