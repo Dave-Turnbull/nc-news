@@ -3,6 +3,7 @@ const {
     retrieveTopics, 
     retrieveArticlesById, 
     retrieveArticles, 
+    retrieveUsers,
     retrieveComments,
     postComment,
     incrementArticleVote,
@@ -49,6 +50,14 @@ exports.checkValidArticle = (req, res, next) => {
     next()
 }
 
+exports.getUsers = (req, res, next) => {
+    return retrieveUsers()
+    .then(({rows}) => {
+        res.status(200).send(rows)
+    })
+    .catch(next)
+}
+
 exports.getCommentsByArticleId = (req, res, next) => {
     const {params} = req
     return retrieveComments(params.id)
@@ -57,6 +66,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
     })
     .catch(next) 
 }
+
 exports.postCommentByArticleId = (req, res, next) => {
     const {params, body} = req
     return postComment(params.id, body)

@@ -6,6 +6,7 @@ const {
     getArticlesById, 
     getArticles, 
     checkValidArticle,
+    getUsers,
     getCommentsByArticleId, 
     postCommentByArticleId,
     patchArticleVotes,
@@ -23,6 +24,8 @@ app.get('/api/articles/:id', getArticlesById)
 app.all('/api/articles/:id*', checkValidArticle)
 
 app.get('/api/articles', getArticles)
+
+app.get('/api/users', getUsers)
 
 app.get('/api/articles/:id/comments', getCommentsByArticleId)
 

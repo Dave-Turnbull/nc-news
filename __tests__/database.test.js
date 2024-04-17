@@ -50,7 +50,7 @@ describe("GET endpoints", () => {
                 } else {
                     expect(typeof body[key].exampleResponse).toBe('string')
                 }
-                if (!key.match(/^GET/) || !key.match(/^DELETE/)) {
+                if (!(key.match(/^GET/) || key.match(/^DELETE/))) {
                     expect(typeof body[key].bodyFormat).toBe('object')
                 }
             }
@@ -329,6 +329,25 @@ describe("DELETE comments", () => {
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe("Bad request")
+        })
+    })
+})
+
+describe("GET users", () => {
+    test("Request from /api/users returns an array of all users", () => {
+        const matchArticleObject = {
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          }
+        return request(app)
+        .get('/api/users')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.length).toBe(4)
+            body.forEach(article => {
+                expect(article).toMatchObject(matchArticleObject)
+            });
         })
     })
 })
