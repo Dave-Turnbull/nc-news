@@ -29,7 +29,7 @@ exports.retrieveTopics = () => {
 }
 
 exports.checkArticleExists = (id) => {
-    const sqlQuery = `SELECT * FROM articles WHERE article_id=${id} ORDER BY created_at DESC`
+    const sqlQuery = format(`SELECT * FROM articles WHERE article_id=%L`, id)
     return retrieveData(sqlQuery)
 }
 
@@ -76,7 +76,7 @@ exports.retrieveUsers = () => {
 }
 
 exports.retrieveComments = (id) => {
-    return db.query(`SELECT * FROM comments WHERE article_id=${id} ORDER BY created_at DESC`)
+    return db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`, [id])
 }
 
 exports.postComment = (id, body) => {
