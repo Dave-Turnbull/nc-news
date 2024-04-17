@@ -47,7 +47,6 @@ exports.retrieveArticles = () => {
 }
 
 exports.retrieveUsers = () => {
-    console.log('hello')
     const sqlQuery = `SELECT * FROM users;`
     return retrieveData(sqlQuery)
 }
