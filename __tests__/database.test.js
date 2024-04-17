@@ -50,7 +50,7 @@ describe("GET endpoints", () => {
                 } else {
                     expect(typeof body[key].exampleResponse).toBe('string')
                 }
-                if (!key.match(/^GET/)) {
+                if (!key.match(/^GET/) || !key.match(/^DELETE/)) {
                     expect(typeof body[key].bodyFormat).toBe('object')
                 }
             }
