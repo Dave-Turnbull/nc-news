@@ -30,7 +30,7 @@ exports.retrieveArticlesById = (id) => {
     return retrieveData(sqlQuery)
 }
 
-exports.retrieveArticles = (id) => {
+exports.retrieveArticles = () => {
     //COALESCE converts the value to 0 if its null
     //AS comment_count sets the column name
     //CAST(... AS INT) converts to an interger (apparently GROUP BY returns as a VARCHAR)
@@ -43,6 +43,11 @@ exports.retrieveArticles = (id) => {
         FROM comments
         GROUP BY comments.article_id
     ) comments ON comments.article_id = articles.article_id ORDER BY created_at DESC`
+    return retrieveData(sqlQuery)
+}
+
+exports.retrieveUsers = () => {
+    const sqlQuery = `SELECT * FROM users;`
     return retrieveData(sqlQuery)
 }
 

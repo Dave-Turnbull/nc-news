@@ -11,6 +11,13 @@
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "topics": [{ "username": "ElUser", "name": "Bob", "avatar_url": "http://theavatarurl.com/1.png" }]
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles (defaults to descending order by date)",
     "queries": ["author", "topic", "sort_by", "order"],
