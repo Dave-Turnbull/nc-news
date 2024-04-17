@@ -1,7 +1,7 @@
 const {
     retrieveEndpoints, 
     retrieveTopics, 
-    retrieveArticlesById, 
+    checkArticleExists, 
     retrieveArticles, 
     retrieveUsers,
     retrieveComments,
@@ -28,7 +28,7 @@ exports.getTopics = (req, res, next) => {
 
 exports.getArticlesById = (req, res, next) => {
     const {params} = req
-    return retrieveArticlesById(params.id)
+    return retrieveArticles({article_id: params.id}, true)
     .then(({rows}) => {
         res.status(200).send(rows[0])
     })
@@ -46,7 +46,7 @@ exports.getArticles = (req, res, next) => {
 
 exports.checkValidArticle = (req, res, next) => {
     const {params} = req
-    retrieveArticlesById(params.id)
+    checkArticleExists(params.id)
     .catch(next) 
     next()
 }
