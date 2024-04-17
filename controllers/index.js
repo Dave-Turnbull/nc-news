@@ -5,7 +5,8 @@ const {
     retrieveArticles, 
     retrieveComments,
     postComment,
-    incrementVotes
+    incrementArticleVote,
+    deleteComment
 } = require('./models')
 
 exports.getEndpoints = (req, res, next) => {
@@ -45,7 +46,7 @@ exports.checkValidArticle = (req, res, next) => {
     const {params} = req
     retrieveArticlesById(params.id)
     .catch(next) 
-    return next()
+    next()
 }
 
 exports.getCommentsByArticleId = (req, res, next) => {
@@ -67,14 +68,22 @@ exports.postCommentByArticleId = (req, res, next) => {
 
 exports.patchArticleVotes = (req, res, next) => {
     const {params, body} = req
-    return incrementVotes(params.id, body.inc_votes, 'article')
+    return incrementArticleVote(params.id, body.inc_votes)
     .then((result) => {
         res.status(200).send(result)
     })
     .catch(next)
 }
 
+exports.deleteCommentById = (req, res, next) => {
+    const {params} = req
+    return deleteComment(params.id)
+    .then((result) => {
+        res.status(204).send()
+    })
+    .catch(next)
+}
+
 exports.urlNotFound = (req, res, next) => {
     return next({status: 404, message: 'URL not found'})
-    .catch(next)
 }

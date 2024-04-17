@@ -50,7 +50,7 @@ describe("GET endpoints", () => {
                 } else {
                     expect(typeof body[key].exampleResponse).toBe('string')
                 }
-                if (!key.match(/^GET/)) {
+                if (!key.match(/^GET/) || !key.match(/^DELETE/)) {
                     expect(typeof body[key].bodyFormat).toBe('object')
                 }
             }
@@ -302,6 +302,30 @@ describe("PATCH articles", () => {
         return request(app)
         .patch('/api/articles/1')
         .send(patchRequest)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+})
+
+describe("DELETE comments", () => {
+    test("DELETE /api/comments/1 deletes the comment and returns 204 with no content", () => {
+        return request(app)
+        .delete('/api/comments/1')
+        .expect(204)
+    })
+    test("DELETE to valid but missing comment id returns 404 comment not found", () => {
+        return request(app)
+        .delete('/api/comments/9999')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe("comment not found")
+        })
+    })
+    test("DELETE to invalid comment id returns 400 bad request", () => {
+        return request(app)
+        .delete('/api/comments/invalid')
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe("Bad request")

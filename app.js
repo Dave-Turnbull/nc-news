@@ -9,6 +9,7 @@ const {
     getCommentsByArticleId, 
     postCommentByArticleId,
     patchArticleVotes,
+    deleteCommentById,
     urlNotFound
     } = require('./controllers')
 
@@ -30,6 +31,8 @@ app.use(express.json())
 app.post('/api/articles/:id/comments', postCommentByArticleId)
 
 app.patch('/api/articles/:id', patchArticleVotes)
+
+app.delete('/api/comments/:id', deleteCommentById)
 
 app.get('*', urlNotFound)
 app.post('*', urlNotFound)
@@ -53,6 +56,7 @@ app.use((err, req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
+    console.log(err)
     res.status(500).send({ message: "Internal server error"})
 })
 

@@ -84,5 +84,11 @@
         "votes": 5,
         "comment_count": 6
     }
+  },
+  "DELETE /api/comments/:id": {
+    "description": "deletes the comment with the given id",
+    "queries": [],
+    "exampleResponse": {
+    }
   }
 }
