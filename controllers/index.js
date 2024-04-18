@@ -44,13 +44,6 @@ exports.getArticles = (req, res, next) => {
     .catch(next) 
 }
 
-exports.checkValidArticle = (req, res, next) => {
-    const {params} = req
-    checkArticleExists(params.id)
-    .catch(next) 
-    next()
-}
-
 exports.getUsers = (req, res, next) => {
     return retrieveUsers()
     .then(({rows}) => {
@@ -61,8 +54,8 @@ exports.getUsers = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
     const {params} = req
-    return retrieveComments(params.id)
-    .then(({rows}) => {
+    return Promise.all([retrieveComments(params.id), checkArticleExists(params.id)])
+    .then(([{rows}]) => {
         res.status(200).send(rows)
     })
     .catch(next) 
@@ -79,8 +72,8 @@ exports.postCommentByArticleId = (req, res, next) => {
 
 exports.patchArticleVotes = (req, res, next) => {
     const {params, body} = req
-    return incrementArticleVote(params.id, body.inc_votes)
-    .then((result) => {
+    return Promise.all([incrementArticleVote(params.id, body.inc_votes), checkArticleExists(params.id)])
+    .then(([result]) => {
         res.status(200).send(result)
     })
     .catch(next)
