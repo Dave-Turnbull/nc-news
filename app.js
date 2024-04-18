@@ -42,7 +42,7 @@ app.post('*', urlNotFound)
 
 app.use((err, req, res, next) => {
     const codes = {
-        badRequest: ['22P02', '42703', '23502'],
+        badRequest: ['22P02', '42703', '23502', '42601'],
         missingInputData: ['23503']
     }
     if (codes.missingInputData.includes(err.code)) {
