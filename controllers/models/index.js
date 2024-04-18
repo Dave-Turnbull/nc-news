@@ -102,6 +102,18 @@ exports.postComment = (id, body) => {
     })
 }
 
+exports.postArticle = (postBody) => {
+    const {title, topic, body, author, article_img_url = 'http://defaultURL.com/1.png'} = postBody
+    return db.query(`
+    INSERT INTO articles (title, topic, body, author, votes, created_at, article_img_url)
+    VALUES ($1, $2, $3, $4, 0, $5, $6)
+    RETURNING *, 0 AS comment_count
+    `, [title, topic, body, author, new Date().toISOString(), article_img_url])
+    .then(({rows}) => {
+        return rows[0]
+    })
+}
+
 exports.incrementVote = (id, incvotes, dataName) => {
     return db.query(`
         UPDATE ${dataName}s 

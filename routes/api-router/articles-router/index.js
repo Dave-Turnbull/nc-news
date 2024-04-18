@@ -5,10 +5,12 @@ const {
     getCommentsByArticleId, 
     postCommentByArticleId,
     patchArticleVotes,
+    addNewArticle
     } = require('../../../controllers')
 
 articlesRouter.route('/')
     .get(getArticles)
+    .post(addNewArticle)
 
 articlesRouter.route('/:id')
     .get(getArticlesById)

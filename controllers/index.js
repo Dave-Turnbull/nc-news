@@ -7,6 +7,7 @@ const {
     retrieveCommentsByArticleId,
     retrieveCommentById,
     postComment,
+    postArticle,
     incrementVote,
     deleteComment
 } = require('./models')
@@ -74,6 +75,15 @@ exports.getCommentsByArticleId = (req, res, next) => {
 exports.postCommentByArticleId = (req, res, next) => {
     const {params, body} = req
     return postComment(params.id, body)
+    .then((result) => {
+        res.status(201).send(result)
+    })
+    .catch(next)
+}
+
+exports.addNewArticle = (req, res, next) => {
+    const {body} = req
+    return postArticle(body)
     .then((result) => {
         res.status(201).send(result)
     })

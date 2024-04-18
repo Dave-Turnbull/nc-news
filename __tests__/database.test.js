@@ -339,6 +339,86 @@ describe("POST comments", () => {
     })
 })
 
+describe("POST articles", () => {
+    test("POST /api/articles returns a new article", () => {
+        const matchArticleObject = {
+            title: 'An article title',
+            topic: 'mitch',
+            author: 'rogersop',
+            body: 'Hello this is an article',
+            created_at: expect.any(String),
+            article_img_url: 'http://animage.com/1.png',
+            votes: 0,
+          }
+          const validArticle = {
+            title: 'An article title',
+            body: 'Hello this is an article',
+            topic: 'mitch',
+            author: 'rogersop',
+            article_img_url: 'http://animage.com/1.png'
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(validArticle)
+        .expect(201)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchArticleObject)
+        })
+    })
+    test("POST /api/articles with missing article_image_url returns a default URL", () => {
+        const matchArticleObject = {
+            title: 'An article title',
+            topic: 'mitch',
+            author: 'rogersop',
+            body: 'Hello this is an article',
+            created_at: expect.any(String),
+            article_img_url: 'http://defaultURL.com/1.png',
+            votes: 0,
+            comment_count: 0,
+          }
+          const validArticle = {
+            title: 'An article title',
+            body: 'Hello this is an article',
+            topic: 'mitch',
+            author: 'rogersop',
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(validArticle)
+        .expect(201)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchArticleObject)
+        })
+    })
+    test("POST /api/articles with missing user returns 404 author not found", () => {
+        const missingUserArticle = {
+            title: 'An article title',
+            body: 'Hello this is an article',
+            topic: 'mitch',
+            author: 'invalid',
+            article_img_url: 'http://animage.com/1.png'
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(missingUserArticle)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe("author not found")
+        })
+    })
+    test("POST with missing body returns 400 Bad request", () => {
+        const missingBody = {
+        }
+        return request(app)
+        .post('/api/articles')
+        .send(missingBody)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+})
+
 describe("PATCH articles", () => {
     const matchArticleObject = {
         title: expect.any(String),
