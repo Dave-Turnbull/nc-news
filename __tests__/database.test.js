@@ -414,6 +414,79 @@ describe("PATCH articles", () => {
     })
 })
 
+describe("PATCH comments", () => {
+    const matchCommentObject = {
+        comment_id: 6,
+        created_at: expect.any(String),
+        author: expect.any(String),
+        body:  expect.any(String),
+        article_id:  expect.any(Number)
+      }
+    test("Update comment votes when patching with valid body", () => {
+        const patchRequest = {
+            inc_votes: 3
+        }
+        matchCommentObject.votes = 3
+        return request(app)
+        .patch('/api/comments/6')
+        .send(patchRequest)
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchCommentObject)
+        })
+    })
+    test("Can remove votes", () => {
+        const patchRequest = {
+            inc_votes: -1
+        }
+        matchCommentObject.votes = -1
+        return request(app)
+        .patch('/api/comments/6')
+        .send(patchRequest)
+        .expect(200)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchCommentObject)
+        })
+    })
+    test("PATCH to invalid comment ID returns 400 Bad request", () => {
+        const patchRequest = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/comments/invalid')
+        .send(patchRequest)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test("PATCH to valid but missing comment ID returns 404 comment not found", () => {
+        const patchRequest = {
+            inc_votes: 1
+        }
+        return request(app)
+        .patch('/api/comments/99999')
+        .send(patchRequest)
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe("comment not found")
+        })
+    })
+    test("PATCH using invalid body returns 400 Bad request", () => {
+        const patchRequest = {
+            inc_votes: 'all the votes'
+        }
+        return request(app)
+        .patch('/api/comments/19')
+        .send(patchRequest)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+})
+
+
 describe("DELETE comments", () => {
     test("DELETE /api/comments/1 deletes the comment and returns 204 with no content", () => {
         return request(app)

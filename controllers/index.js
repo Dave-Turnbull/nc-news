@@ -4,9 +4,10 @@ const {
     checkArticleExists, 
     retrieveArticles, 
     retrieveUsers,
-    retrieveComments,
+    retrieveCommentsByArticleId,
+    retrieveCommentById,
     postComment,
-    incrementArticleVote,
+    incrementVote,
     deleteComment
 } = require('./models')
 
@@ -63,7 +64,7 @@ exports.getUserById = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
     const {params} = req
-    return Promise.all([retrieveComments(params.id), checkArticleExists(params.id)])
+    return Promise.all([retrieveCommentsByArticleId(params.id), checkArticleExists(params.id)])
     .then(([{rows}]) => {
         res.status(200).send(rows)
     })
@@ -81,7 +82,16 @@ exports.postCommentByArticleId = (req, res, next) => {
 
 exports.patchArticleVotes = (req, res, next) => {
     const {params, body} = req
-    return Promise.all([incrementArticleVote(params.id, body.inc_votes), checkArticleExists(params.id)])
+    return Promise.all([incrementVote(params.id, body.inc_votes, 'article'), checkArticleExists(params.id)])
+    .then(([result]) => {
+        res.status(200).send(result)
+    })
+    .catch(next)
+}
+
+exports.patchCommentVotes = (req, res, next) => {
+    const {params, body} = req
+    return Promise.all([incrementVote(params.id, body.inc_votes, 'comment'), retrieveCommentById(params.id)])
     .then(([result]) => {
         res.status(200).send(result)
     })

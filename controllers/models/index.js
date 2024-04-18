@@ -81,8 +81,14 @@ exports.retrieveUsers = (id) => {
     return retrieveData(sqlQuery)
 }
 
-exports.retrieveComments = (id) => {
-    return db.query(`SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`, [id])
+exports.retrieveCommentsByArticleId = (id) => {
+    const sqlQuery = format(`SELECT * FROM comments WHERE article_id = %L ORDER BY created_at DESC`, id)
+    return db.query(sqlQuery)
+}
+
+exports.retrieveCommentById = (id) => {
+    const sqlQuery = format(`SELECT * FROM comments WHERE comment_id = %L`, id)
+    return retrieveData(sqlQuery)
 }
 
 exports.postComment = (id, body) => {
@@ -96,11 +102,11 @@ exports.postComment = (id, body) => {
     })
 }
 
-exports.incrementArticleVote = (id, incvotes) => {
+exports.incrementVote = (id, incvotes, dataName) => {
     return db.query(`
-        UPDATE articles 
+        UPDATE ${dataName}s 
         SET votes = votes + $1 
-        WHERE article_id = $2
+        WHERE ${dataName}_id = $2
         RETURNING *`, [incvotes, id])
     .then(({rows}) => {
         return rows[0]
