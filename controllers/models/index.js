@@ -46,27 +46,30 @@ exports.retrieveArticles = (query, includeBody) => {
         FROM comments
         GROUP BY comments.article_id
     ) comments ON comments.article_id = articles.article_id`)
-    if (Object.keys(query).length !== 0) {
-        const approvedQueries = [
-            'article_id', 
-            'title', 
-            'topic', 
-            'author',
-            'created_at', 
-            'votes', 
-            'article_img_url'
-        ]
+    const approvedQueries = [
+        'article_id', 
+        'title', 
+        'topic', 
+        'author',
+        'created_at', 
+        'votes', 
+        'article_img_url'
+    ]
+    if (Object.keys(query).some((theQuery) => approvedQueries.includes(theQuery))) {
         const conditionalsArray = []
         for (key in query) {
             if (approvedQueries.includes(key)) {
                 conditionalsArray.push(format(`articles.%I = %L`, key, query[key]))
-            } else {
+            } else if (key !== 'sort_by' && key !== 'order'){
                 return Promise.reject({status: 400, message: "Invalid query"})
             }
         }
         sqlQuery += ` WHERE ${conditionalsArray.join(' AND ')}`
     }
-    sqlQuery += format(` ORDER BY created_at DESC`)
+    if (query.order && !(query.order.toUpperCase() === 'ASC' || query.order.toUpperCase() === 'DESC')) {
+        return Promise.reject({status: 400, message: "Invalid query"})
+    }
+    sqlQuery += format(` ORDER BY %I ${query.order ? query.order : 'DESC'}`, query.sort_by ? query.sort_by : 'created_at')
     return retrieveData(sqlQuery)
 }
 

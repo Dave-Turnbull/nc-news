@@ -172,9 +172,51 @@ describe("GET articles", () => {
             expect(body.articles).toBeSorted({key: 'created_at', descending: true})
         })
     })
+    test("Request with sort_by query sorts by given value", () => {
+        return request(app)
+        .get('/api/articles?topic=mitch&&sort_by=article_id')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles.length).toBe(12)
+            expect(body.articles).toBeSorted({key: 'article_id', descending: true})
+        })
+    })
+    test("Request with invalid sort_by query returns 400 Bad request", () => {
+        return request(app)
+        .get('/api/articles?topic=mitch&&sort_by=invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Bad request")
+        })
+    })
+    test("Request with order=asc query sorts in ascending order", () => {
+        return request(app)
+        .get('/api/articles?topic=mitch&&sort_by=article_id&&order=asc')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles.length).toBe(12)
+            expect(body.articles).toBeSorted({key: 'article_id', ascending: true})
+        })
+    })
+    test("Request with invalid order query returns 400 Bad request", () => {
+        return request(app)
+        .get('/api/articles?order=ascending')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Invalid query")
+        })
+    })
     test("Request with invalid query returns 400 Invalid query", () => {
         return request(app)
         .get('/api/articles?invalid=mitch&&author=rogersop')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Invalid query")
+        })
+    })
+    test("Attempting SQL injection in order query returns 400 Invalid query", () => {
+        return request(app)
+        .get('/api/articles?order=desc; DROP TABLE comments;')
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe("Invalid query")
