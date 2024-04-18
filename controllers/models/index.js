@@ -73,8 +73,11 @@ exports.retrieveArticles = (query, includeBody) => {
     return retrieveData(sqlQuery)
 }
 
-exports.retrieveUsers = () => {
-    const sqlQuery = `SELECT * FROM users;`
+exports.retrieveUsers = (id) => {
+    let sqlQuery = `SELECT * FROM users`
+    if (id) {
+        sqlQuery += format(` WHERE username=%L`, id)
+    }
     return retrieveData(sqlQuery)
 }
 

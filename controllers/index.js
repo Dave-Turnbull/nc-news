@@ -52,6 +52,15 @@ exports.getUsers = (req, res, next) => {
     .catch(next)
 }
 
+exports.getUserById = (req, res, next) => {
+    const {id} = req.params
+    return retrieveUsers(id)
+    .then(({rows}) => {
+        res.status(200).send(rows[0])
+    })
+    .catch(next)
+}
+
 exports.getCommentsByArticleId = (req, res, next) => {
     const {params} = req
     return Promise.all([retrieveComments(params.id), checkArticleExists(params.id)])

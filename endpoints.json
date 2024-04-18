@@ -13,9 +13,16 @@
   },
   "GET /api/users": {
     "description": "serves an array of all users",
-    "queries": ["article_id", "title", "topic", "author", "created_at", "votes", "article_img_url"],
+    "queries": [],
     "exampleResponse": {
-      "topics": [{ "username": "ElUser", "name": "Bob", "avatar_url": "http://theavatarurl.com/1.png" }]
+      "users": [{ "username": "ElUser", "name": "Bob", "avatar_url": "http://theavatarurl.com/1.png" }]
+    }
+  },
+  "GET /api/users:id": {
+    "description": "serves a user by the given username",
+    "queries": [],
+    "exampleResponse": {
+      "users": { "username": "ElUser", "name": "Bob", "avatar_url": "http://theavatarurl.com/1.png" }
     }
   },
   "GET /api/articles": {
