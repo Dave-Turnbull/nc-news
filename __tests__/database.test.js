@@ -680,7 +680,7 @@ describe("GET users", () => {
     })
 })
 
-describe.only("POST topics", () => {
+describe("POST topics", () => {
     test("POST /api/topics returns a new article", () => {
         const matchTopicObject = {
             slug: 'A new topic',
