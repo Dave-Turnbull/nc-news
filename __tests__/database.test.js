@@ -728,6 +728,27 @@ describe("POST topics", () => {
     })
 })
 
+describe("DELETE /api/aritcles/:id", () => {
+    test("Deletes an article and its comments by given id", () => {
+        return request(app)
+        .delete('/api/articles/1')
+        .expect(204)
+        .then(() => {
+            db.query('SELECT * FROM comments WHERE article_id=1').then((result) => {
+                expect(result.rows.length).toBe(0)
+            })
+        })
+    })
+    test("Deleting a missing article responds with 404", () => {
+        return request(app)
+        .delete('/api/articles/99999')
+        .expect(404)
+        .then(({body}) => {
+            expect(body.message).toBe('article not found')
+        })
+    })
+})
+
 describe("Invalid URLs", () => {
   test("Request from /api/topics! returns 404 not found", () => {
     return request(app)

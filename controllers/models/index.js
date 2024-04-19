@@ -181,3 +181,21 @@ exports.deleteComment = (id) => {
         }
     })
 }
+
+exports.deleteArticleAndComments = (id) => {
+    return db.query(`
+        DELETE FROM comments 
+        WHERE article_id = $1;
+        `, [id])
+    .then(() => {
+        return db.query(`
+        DELETE FROM articles
+        WHERE article_id = $1
+        RETURNING *
+        `, [id]).then(({rows}) => {
+            if (rows.length === 0) {
+                return Promise.reject({status: 404, message: `article not found`})
+            }
+        })
+    })
+}

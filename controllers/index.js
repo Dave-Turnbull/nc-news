@@ -10,7 +10,8 @@ const {
     postComment,
     postArticle,
     incrementVote,
-    deleteComment
+    deleteComment,
+    deleteArticleAndComments
 } = require('./models')
 
 exports.getEndpoints = (req, res, next) => {
@@ -99,6 +100,15 @@ exports.addNewArticle = (req, res, next) => {
     return postArticle(body)
     .then((result) => {
         res.status(201).send(result)
+    })
+    .catch(next)
+}
+
+exports.deleteArticle = (req, res, next) => {
+    const {params} = req
+    return deleteArticleAndComments(params.id)
+    .then(() => {
+        res.status(204).send()
     })
     .catch(next)
 }
