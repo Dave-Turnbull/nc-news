@@ -6,12 +6,18 @@ exports.handleApiErrors = (err, req, res, next) => {
     if (codes.missingInputData.includes(err.code)) {
         const missingDataName = err.detail.match(/[a-z]+/ig)[1]
         res.status(404).send({message: `${missingDataName} not found`})
+        return
     }
-    if (codes.badRequest.includes(err.code)) {
+    else if (codes.badRequest.includes(err.code)) {
         res.status(400).send({message: 'Bad request'})
+        return
     }
-    if (err.status && err.message) { 
+    else if (err.status && err.message) { 
         res.status(err.status).send({message: err.message})
+        return
     }
-    res.status(500).send({ message: "Internal server error"})
+    else {
+        console.log(err)
+        res.status(500).send({ message: "Internal server error"})
+    }
 }

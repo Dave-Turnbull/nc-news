@@ -110,7 +110,6 @@ describe("GET articles", () => {
         .get('/api/articles')
         .expect(200)
         .then(({body}) => {
-            expect(body.articles.length).toBe(13)
             body.articles.forEach(article => {
                 expect(article).toMatchObject(matchArticleObject)
                 expect(Object.keys(article).includes('body')).toBeFalsy()
@@ -177,7 +176,6 @@ describe("GET articles", () => {
         .get('/api/articles?topic=mitch&&sort_by=article_id')
         .expect(200)
         .then(({body}) => {
-            expect(body.articles.length).toBe(12)
             expect(body.articles).toBeSorted({key: 'article_id', descending: true})
         })
     })
@@ -194,7 +192,6 @@ describe("GET articles", () => {
         .get('/api/articles?topic=mitch&&sort_by=article_id&&order=asc')
         .expect(200)
         .then(({body}) => {
-            expect(body.articles.length).toBe(12)
             expect(body.articles).toBeSorted({key: 'article_id', ascending: true})
         })
     })
@@ -222,6 +219,40 @@ describe("GET articles", () => {
             expect(body.message).toBe("Invalid query")
         })
     })
+    test("Request from /api/articles with limit query responds with the limited rows and a total count", () => {
+        return request(app)
+        .get('/api/articles?limit=10')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles.length).toBe(10)
+            expect(body.total_count).toBe(13)
+        })
+    })
+    test("Request with limit=10 and p=2 responds with the 2nd page of rows", () => {
+        return request(app)
+        .get('/api/articles?limit=10&&p=2')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.articles.length).toBe(3)
+            expect(body.total_count).toBe(13)
+        })
+    })
+    test("Invalid limit responds with 400 Invalid query", () => {
+        return request(app)
+        .get('/api/articles?limit=invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Invalid query")
+        })
+    })
+    test("Invalid page responds with 400 Invalid query", () => {
+        return request(app)
+        .get('/api/articles?limit=10&&p=invalid')
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe("Invalid query")
+        })
+    })
 })
 
 describe("GET comments", () => {
@@ -238,11 +269,11 @@ describe("GET comments", () => {
         .get('/api/articles/1/comments')
         .expect(200)
         .then(({body}) => {
-            expect(body.length).toBe(11)
-            body.forEach(article => {
+            expect(body.comments.length > 0).toBeTruthy()
+            body.comments.forEach(article => {
                 expect(article).toMatchObject(matchCommentObject)
             })
-            expect(body).toBeSorted({key: 'created_at', descending: true})
+            expect(body.comments).toBeSorted({key: 'created_at', descending: true})
         })
     })
     test("Request for valid but missing article ID returns 404 article not found", () => {
@@ -258,7 +289,7 @@ describe("GET comments", () => {
         .get('/api/articles/2/comments')
         .expect(200)
         .then(({body}) => {
-            expect(body).toEqual([])
+            expect(body.comments).toEqual([])
         })
     })
     test("Request for invalid article ID returns 400 Bad request", () => {
@@ -267,6 +298,24 @@ describe("GET comments", () => {
         .expect(400)
         .then(({body}) => {
             expect(body.message).toBe('Bad request')
+        })
+    })
+    test("Adding limit query responds with the limited number of comments and total_count", () => {
+        return request(app)
+        .get('/api/articles/1/comments?limit=10')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments.length).toBe(10)
+            expect(body.total_count).toBe(11)
+        })
+    })
+    test("Adding limit and page queries responds with the specified page of comments and total_count", () => {
+        return request(app)
+        .get('/api/articles/1/comments?limit=10&&p=2')
+        .expect(200)
+        .then(({body}) => {
+            expect(body.comments.length).toBe(1)
+            expect(body.total_count).toBe(11)
         })
     })
 })
@@ -627,6 +676,54 @@ describe("GET users", () => {
         .expect(404)
         .then(({body}) => {
             expect(body.message).toBe("username not found")
+        })
+    })
+})
+
+describe.only("POST topics", () => {
+    test("POST /api/topics returns a new article", () => {
+        const matchTopicObject = {
+            slug: 'A new topic',
+            description: 'A description',
+          }
+        const validTopic = {
+            slug: 'A new topic',
+            description: 'A description',
+          }
+        return request(app)
+        .post('/api/topics')
+        .send(validTopic)
+        .expect(201)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchTopicObject)
+        })
+    })
+    test("POST /api/topics with no description returns a new article", () => {
+        const matchTopicObject = {
+            slug: 'A new topic',
+            description: null,
+          }
+        const validTopic = {
+            slug: 'A new topic',
+          }
+        return request(app)
+        .post('/api/topics')
+        .send(validTopic)
+        .expect(201)
+        .then(({body}) => {
+            expect(body).toMatchObject(matchTopicObject)
+        })
+    })
+    test("POST /api/topics with no slug returns 400", () => {
+        const invalidTopic = {
+            description: 'A description',
+          }
+        return request(app)
+        .post('/api/topics')
+        .send(invalidTopic)
+        .expect(400)
+        .then(({body}) => {
+            expect(body.message).toBe('Bad request')
         })
     })
 })

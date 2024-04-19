@@ -1,6 +1,7 @@
 const {
     retrieveEndpoints, 
     retrieveTopics, 
+    postTopic,
     checkArticleExists, 
     retrieveArticles, 
     retrieveUsers,
@@ -22,8 +23,17 @@ exports.getEndpoints = (req, res, next) => {
 
 exports.getTopics = (req, res, next) => {
     return retrieveTopics('topics')
-    .then(({rows}) => {
-        res.status(200).send({topics: rows})
+    .then((response) => {
+        res.status(200).send({topics: response.data, total_count: response.total_count})
+    })
+    .catch(next) 
+}
+
+exports.addNewTopic = (req, res, next) => {
+    const {body} = req
+    return postTopic(body)
+    .then((response) => {
+        res.status(201).send(response)
     })
     .catch(next) 
 }
@@ -31,8 +41,8 @@ exports.getTopics = (req, res, next) => {
 exports.getArticlesById = (req, res, next) => {
     const {params} = req
     return retrieveArticles({article_id: params.id}, true)
-    .then(({rows}) => {
-        res.status(200).send(rows[0])
+    .then((response) => {
+        res.status(200).send(response.data[0])
     })
     .catch(next) 
 }
@@ -40,16 +50,16 @@ exports.getArticlesById = (req, res, next) => {
 exports.getArticles = (req, res, next) => {
     const {query} = req
     return retrieveArticles(query)
-    .then(({rows}) => {
-        res.status(200).send({articles: rows})
+    .then((response) => {
+        res.status(200).send({articles: response.data, total_count: response.total_count})
     })
     .catch(next) 
 }
 
 exports.getUsers = (req, res, next) => {
     return retrieveUsers()
-    .then(({rows}) => {
-        res.status(200).send({users: rows})
+    .then((response) => {
+        res.status(200).send({users: response.data, total_count: response.total_count})
     })
     .catch(next)
 }
@@ -57,17 +67,20 @@ exports.getUsers = (req, res, next) => {
 exports.getUserById = (req, res, next) => {
     const {id} = req.params
     return retrieveUsers(id)
-    .then(({rows}) => {
-        res.status(200).send(rows[0])
+    .then((response) => {
+        res.status(200).send(response.data[0])
     })
     .catch(next)
 }
 
 exports.getCommentsByArticleId = (req, res, next) => {
-    const {params} = req
-    return Promise.all([retrieveCommentsByArticleId(params.id), checkArticleExists(params.id)])
-    .then(([{rows}]) => {
-        res.status(200).send(rows)
+    const {params, query} = req
+    return checkArticleExists(params.id)
+    .then(() => {
+        return retrieveCommentsByArticleId(params.id, query)
+        .then((response) => {
+            res.status(200).send({comments: response.data, total_count: response.total_count})
+        })
     })
     .catch(next) 
 }

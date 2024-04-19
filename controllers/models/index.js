@@ -10,22 +10,76 @@ exports.retrieveEndpoints = () => {
     })
 }
 
-const retrieveData = (sqlQuery) => {
-    return db.query(sqlQuery)
+const formatConditionals = (sqlQuery, queries = {}, approvedConditionals, tableName) => {
+    const { limit, order, sort_by, p, ...conditionals } = queries
+    if (Object.keys(conditionals).length !== 0) {
+        const conditionalsArray = []
+        for (key in conditionals) {
+            if (approvedConditionals.includes(key)) {
+                conditionalsArray.push(
+                    format(`${tableName ? tableName + '.': ''}%I = %L`, key, queries[key])
+                    )
+            } else {
+                throw {status: 400, message: "Invalid query"}
+            }
+        }
+        sqlQuery += ` WHERE ${conditionalsArray.join(' AND ')}`
+    }
+    return sqlQuery
+}
+
+const formatOrder = (sqlQuery, queries = {}, defaultSortColumn) => {
+    const { order = 'DESC', sort_by = defaultSortColumn} = queries
+    if (!(order.toUpperCase() === 'ASC' || order.toUpperCase() === 'DESC')) {
+        throw {status: 400, message: "Invalid query"}
+    }
+    if (sort_by) {
+        sqlQuery += format(` ORDER BY %I ${order}`, sort_by)
+    }
+    return sqlQuery
+}
+
+const retrieveData = (sqlQuery, limit, p, dont404) => {
+    let sqlQueryWithLimit = sqlQuery
+    if (!isNaN(limit) && !isNaN(p)) {
+        sqlQueryWithLimit += ` LIMIT ${limit} OFFSET ${limit * (p - 1)}`
+    } else if (limit) {
+        return Promise.reject({status: 400, message: `Invalid query`})
+    }
+    return db.query(sqlQueryWithLimit)
     .then((result) => {
-        if(result.rows.length === 0) {
-            const dataName = result.fields
-                .find(field => field.columnID === 1).name
-                .match(/[a-z]+/ig)[0]
+        const dataName = result.fields
+            .find(field => field.columnID === 1).name
+            .match(/[a-z]+/ig)[0]
+        if(result.rows.length === 0 && !dont404) {
             return Promise.reject({status: 404, message: `${dataName} not found`})
         }
-        return result
+        if ((result.rows.length < limit && p === 1) || !limit) {
+            return { data: result.rows, "total_count": result.rows.length}
+        } else {
+            return db.query(sqlQuery).then((total_pages) => {
+                return { data: result.rows, "total_count": total_pages.rows.length}
+            })
+        }
     })
 }
 
+//adding pagination to this will cause bugs in retrieveData (there is no topic_id column)
 exports.retrieveTopics = () => {
     const sqlQuery = `SELECT * FROM topics`
     return retrieveData(sqlQuery)
+}
+
+exports.postTopic = (postBody) => {
+    const {slug, description} = postBody
+    return db.query(`
+    INSERT INTO topics (slug, description)
+    VALUES ($1, $2)
+    RETURNING *
+    `, [slug, description])
+    .then(({rows}) => {
+        return rows[0]
+    })
 }
 
 exports.checkArticleExists = (id) => {
@@ -33,7 +87,7 @@ exports.checkArticleExists = (id) => {
     return retrieveData(sqlQuery)
 }
 
-exports.retrieveArticles = (query, includeBody) => {
+exports.retrieveArticles = (queries, includeBody) => {
     //COALESCE converts the value to 0 if its null
     //AS comment_count sets the column name
     //CAST(... AS INT) converts to an interger (apparently GROUP BY returns as a VARCHAR)
@@ -46,7 +100,7 @@ exports.retrieveArticles = (query, includeBody) => {
         FROM comments
         GROUP BY comments.article_id
     ) comments ON comments.article_id = articles.article_id`)
-    const approvedQueries = [
+    const approvedConditionals = [
         'article_id', 
         'title', 
         'topic', 
@@ -55,22 +109,11 @@ exports.retrieveArticles = (query, includeBody) => {
         'votes', 
         'article_img_url'
     ]
-    if (Object.keys(query).some((theQuery) => approvedQueries.includes(theQuery))) {
-        const conditionalsArray = []
-        for (key in query) {
-            if (approvedQueries.includes(key)) {
-                conditionalsArray.push(format(`articles.%I = %L`, key, query[key]))
-            } else if (key !== 'sort_by' && key !== 'order'){
-                return Promise.reject({status: 400, message: "Invalid query"})
-            }
-        }
-        sqlQuery += ` WHERE ${conditionalsArray.join(' AND ')}`
-    }
-    if (query.order && !(query.order.toUpperCase() === 'ASC' || query.order.toUpperCase() === 'DESC')) {
-        return Promise.reject({status: 400, message: "Invalid query"})
-    }
-    sqlQuery += format(` ORDER BY %I ${query.order ? query.order : 'DESC'}`, query.sort_by ? query.sort_by : 'created_at')
-    return retrieveData(sqlQuery)
+    const {limit = 10, p = 1} = queries
+    const defaultSortColumn = 'created_at'
+    sqlQuery = formatConditionals(sqlQuery, queries, approvedConditionals, 'articles')
+    sqlQuery = formatOrder(sqlQuery, queries, defaultSortColumn)
+    return retrieveData(sqlQuery, limit, p)
 }
 
 exports.retrieveUsers = (id) => {
@@ -81,9 +124,10 @@ exports.retrieveUsers = (id) => {
     return retrieveData(sqlQuery)
 }
 
-exports.retrieveCommentsByArticleId = (id) => {
+exports.retrieveCommentsByArticleId = (id, queries) => {
     const sqlQuery = format(`SELECT * FROM comments WHERE article_id = %L ORDER BY created_at DESC`, id)
-    return db.query(sqlQuery)
+    const {limit = 10, p = 1} = queries
+    return retrieveData(sqlQuery, limit, p, true)
 }
 
 exports.retrieveCommentById = (id) => {
