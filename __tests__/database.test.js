@@ -318,6 +318,48 @@ describe("GET comments", () => {
             expect(body.total_count).toBe(11)
         })
     })
+    describe("/api/comments endpoint", () => {
+        test("Request from /api/comments returns an array of all comments", () => {
+            const matchCommentObject = {
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String),
+                article_id: expect.any(Number)
+              }
+            return request(app)
+            .get('/api/comments')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.comments.length > 0).toBeTruthy()
+                body.comments.forEach(article => {
+                    expect(article).toMatchObject(matchCommentObject)
+                })
+                expect(body.comments).toBeSorted({key: 'created_at', descending: true})
+            })
+        })
+        test("Request from /api/comments?author=butter_bridge returns an array of comments from a user", () => {
+            const matchCommentObject = {
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: 'butter_bridge',
+                body: expect.any(String),
+                article_id: expect.any(Number)
+              }
+            return request(app)
+            .get('/api/comments?author=butter_bridge')
+            .expect(200)
+            .then(({body}) => {
+                expect(body.comments.length > 0).toBeTruthy()
+                body.comments.forEach(article => {
+                    expect(article).toMatchObject(matchCommentObject)
+                })
+                expect(body.comments).toBeSorted({key: 'created_at', descending: true})
+            })
+        })
+    })
 })
 
 

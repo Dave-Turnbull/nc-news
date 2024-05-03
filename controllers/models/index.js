@@ -83,7 +83,7 @@ exports.postTopic = (postBody) => {
 }
 
 exports.checkArticleExists = (id) => {
-    const sqlQuery = format(`SELECT * FROM articles WHERE article_id=%L`, id)
+    const sqlQuery = format(`SELECT article_id FROM articles WHERE article_id=%L`, id)
     return retrieveData(sqlQuery)
 }
 
@@ -122,6 +122,22 @@ exports.retrieveUsers = (id) => {
         sqlQuery += format(` WHERE username=%L`, id)
     }
     return retrieveData(sqlQuery)
+}
+
+exports.retrieveComments = (queries) => {
+    let sqlQuery = format(`SELECT * FROM comments`)
+    const approvedConditionals = [
+        "comment_id",
+        "votes",
+        "created_at",
+        "author",
+        "article_id"
+    ]
+    const {limit = 10, p = 1} = queries
+    const defaultSortColumn = 'created_at'
+    sqlQuery = formatConditionals(sqlQuery, queries, approvedConditionals, 'comments')
+    sqlQuery = formatOrder(sqlQuery, queries, defaultSortColumn)
+    return retrieveData(sqlQuery, limit, p)
 }
 
 exports.retrieveCommentsByArticleId = (id, queries) => {

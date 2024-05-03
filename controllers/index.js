@@ -5,6 +5,7 @@ const {
     checkArticleExists, 
     retrieveArticles, 
     retrieveUsers,
+    retrieveComments,
     retrieveCommentsByArticleId,
     retrieveCommentById,
     postComment,
@@ -70,6 +71,15 @@ exports.getUserById = (req, res, next) => {
     return retrieveUsers(id)
     .then((response) => {
         res.status(200).send(response.data[0])
+    })
+    .catch(next)
+}
+
+exports.getComments = (req, res, next) => {
+    const {query} = req
+    return retrieveComments(query)
+    .then((response) => {
+        res.status(200).send({comments: response.data, total_count: response.total_count})
     })
     .catch(next)
 }
